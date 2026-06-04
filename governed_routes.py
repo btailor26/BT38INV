@@ -1327,12 +1327,6 @@ def governed_warehouse_page():
                 MarketplaceListing.external_sku.ilike(like),
                 MarketplaceListing.title.ilike(like),
                 MarketplaceListing.external_listing_id.ilike(like),
-                MarketplaceListing.parent_item_id.ilike(like),
-                MarketplaceListing.external_parent_id.ilike(like),
-                MarketplaceListing.variation_sku_map.ilike(like),
-                MarketplaceListing.asin.ilike(like),
-                MarketplaceListing.fnsku.ilike(like),
-                MarketplaceListing.barcode.ilike(like),
             )
         )
 
@@ -2065,12 +2059,6 @@ def governed_product_linking_data_compat():
                     MarketplaceListing.external_sku.ilike(like),
                     MarketplaceListing.title.ilike(like),
                     MarketplaceListing.external_listing_id.ilike(like),
-                    MarketplaceListing.asin.ilike(like),
-                    MarketplaceListing.fnsku.ilike(like),
-                    MarketplaceListing.barcode.ilike(like),
-                    MarketplaceListing.parent_item_id.ilike(like),
-                    MarketplaceListing.external_parent_id.ilike(like),
-                    MarketplaceListing.variation_sku_map.ilike(like),
                 ))
                 .distinct()
                 .all()
@@ -2092,14 +2080,8 @@ def governed_product_linking_data_compat():
 
         listing_query = listing_query.filter(or_(
             MarketplaceListing.external_sku.ilike(like),
-            MarketplaceListing.title.ilike(like),
-            MarketplaceListing.external_listing_id.ilike(like),
-            MarketplaceListing.asin.ilike(like),
-            MarketplaceListing.fnsku.ilike(like),
-            MarketplaceListing.barcode.ilike(like),
-            MarketplaceListing.parent_item_id.ilike(like),
-            MarketplaceListing.external_parent_id.ilike(like),
-            MarketplaceListing.variation_sku_map.ilike(like),
+                    MarketplaceListing.title.ilike(like),
+                    MarketplaceListing.external_listing_id.ilike(like),
         ))
 
     total_stock = stock_query.count()
