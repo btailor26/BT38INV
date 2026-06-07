@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - BT38 Health{% endblock %}
+
+{% block content %}
+<style>
+.bt38-soft-card{border:0;border-radius:18px;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.bt38-hero{background:linear-gradient(90deg,#fff7df,#fff);border-radius:22px}
+.bt38-metric{border:1px solid #eef2f7;border-radius:16px}
+.bt38-action-row{border-bottom:1px solid #eef2f7;padding:12px 0}
+.bt38-action-row:last-child{border-bottom:0}
+.bt38-chip{border-radius:999px;padding:4px 10px;font-size:12px}
+</style>
+
+<div class="bt38-hero p-4 mb-3">
+  <div class="row align-items-center">
+    <div class="col-lg-8">
+      <p class="text-muted mb-1">Good morning, Bhavin.</p>
+      <h2 class="mb-2">You have <span class="text-primary">{{ stats.total_attention }}</span> action{{ '' if stats.total_attention == 1 else 's' }} today</h2>
+      <p class="mb-0 text-muted">Don’t worry, we’re going to get you back on track. We’ve got your back.</p>
+    </div>
+    <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+      <div class="bg-white rounded p-3 d-inline-block shadow-sm">
+        <strong>You’re doing great!</strong>
+        <div class="text-muted small">Your dashboard is watching the important areas.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-6">
+    <div class="card bt38-soft-card h-100">
+      <div class="card-header bg-white border-0 d-flex justify-content-between">
+        <div>
+          <h5 class="mb-0">Connected Stores</h5>
+          <small class="text-muted">Marketplace health at a glance</small>
+        </div>
+        <a href="/settings" class="small">Manage Stores</a>
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+          {% if stores %}
+            {% for store in stores[:5] %}
+            <div class="col">
+              <div class="bt38-metric p-3 text-center h-100">
+                <strong>{{ store.name }}</strong>
+                <div class="small text-muted">{{ store.platform }}</div>
+                <div class="mt-2">
+                  <span class="bt38-chip {% if store.is_active %}bg-success text-white{% else %}bg-warning text-dark{% endif %}">
+                    {% if store.is_active %}Healthy{% else %}Attention{% endif %}
+                  </span>
+                </div>
+                <a class="small d-block mt-2" href="/settings">Go to Store</a>
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="col-12">
+              <div class="bt38-metric p-3 text-center h-100">
+                <strong>No stores connected yet</strong>
+                <div class="small text-muted">Connected marketplaces will appear here.</div>
+                <a class="small d-block mt-2" href="/settings">Open settings</a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card bt38-soft-card h-100">
+      <div class="card-header bg-white border-0">
+        <h5 class="mb-0">Today’s Focus</h5>
+        <small class="text-muted">The main things needing attention</small>
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-3"><div class="bt38-metric p-3"><small class="text-muted">Real sales</small><h4>{{ stats.real_sales_count }}</h4></div></div>
+          <div class="col-md-3"><div class="bt38-metric p-3"><small class="text-muted">Dispatch</small><h4>{{ stats.pending_dispatch }}</h4></div></div>
+          <div class="col-md-3"><div class="bt38-metric p-3"><small class="text-muted">Messages</small><h4>{{ stats.pending_messages }}</h4></div></div>
+          <div class="col-md-3"><div class="bt38-metric p-3"><small class="text-muted">MCF</small><h4>{{ stats.real_mcf_pending }}</h4></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card bt38-soft-card">
+      <div class="card-header bg-white border-0 d-flex justify-content-between">
+        <div>
+          <h5 class="mb-0">Actions</h5>
+          <small class="text-muted">Plain-English guidance, not system noise</small>
+        </div>
+        <span class="badge bg-danger">{{ stats.total_attention }}</span>
+      </div>
+      <div class="card-body">
+        {% if attention_items %}
+          {% for item in attention_items %}
+          <div class="bt38-action-row">
+            <div class="d-flex justify-content-between gap-3">
+              <div>
+                <strong>{{ item.title }}</strong>
+                <div class="small text-muted">{{ item.message }}</div>
+                <span class="badge bg-light text-dark mt-1">{{ item.marketplace }}</span>
+              </div>
+              <div class="text-end">
+                <small class="text-muted d-block">{{ item.created_at.strftime('%H:%M') if item.created_at else 'Now' }}</small>
+                <a class="btn btn-sm btn-outline-primary mt-1" href="{{ item.action_url }}" target="{% if item.action_url.startswith('http') %}_blank{% else %}_self{% endif %}" rel="noopener">Open</a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-4">
+            <i data-feather="check-circle" class="text-success mb-2" size="42"></i>
+            <h5>No live sales/order actions found right now.</h5>
+            <p class="text-muted mb-0">When real marketplace orders, sales orders, MCF orders, or buyer messages are present, they will appear here.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card bt38-soft-card mb-3">
+      <div class="card-header bg-white border-0">
+        <h5 class="mb-0">Health Overview</h5>
+        <small class="text-muted">Simple confidence checks</small>
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-6"><div class="bt38-metric p-3"><small>Stock on hand</small><h4>Watching</h4><span class="badge bg-success">Healthy</span></div></div>
+          <div class="col-md-6"><div class="bt38-metric p-3"><small>Marketplace alerts</small><h4>Governed</h4><span class="badge bg-primary">Active</span></div></div>
+          <div class="col-md-6"><div class="bt38-metric p-3"><small>Real sales/orders</small><h4>{{ stats.real_sales_count }}</h4><span class="badge bg-primary">Live data</span></div></div>
+          <div class="col-md-6"><div class="bt38-metric p-3"><small>Orders to dispatch</small><h4>{{ stats.pending_dispatch }}</h4><span class="badge bg-warning text-dark">Check</span></div></div>
+          <div class="col-md-6"><div class="bt38-metric p-3"><small>Overall Health</small><h4>Good</h4><span class="badge bg-success">On track</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bt38-soft-card">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-1">Great job!</h5>
+          <p class="text-muted mb-0">You’re building a calmer way to manage marketplace actions.</p>
+        </div>
+        <a href="{{ url_for('governed.governed_dashboard_page') }}" class="btn btn-primary">Refresh</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){ if(window.feather){ feather.replace(); }});
+</script>
+{% endblock %}
