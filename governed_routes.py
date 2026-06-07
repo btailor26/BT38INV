@@ -2127,6 +2127,9 @@ def governed_product_linking_data_compat():
             "amazon_fulfillment_channel": listing.amazon_fulfillment_channel,
             "is_fba": bool(getattr(listing, "is_fba", False)),
             "is_pushable": bool(getattr(listing, "is_pushable", False)),
+            "quantity": getattr(listing, "effective_quantity", 0),
+            "available_quantity": getattr(listing, "effective_quantity", 0),
+            "sellable_quantity": getattr(listing, "effective_quantity", 0),
             "effective_quantity": getattr(listing, "effective_quantity", 0),
         }
 
