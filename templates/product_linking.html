@@ -922,7 +922,10 @@ function renderWarehouseProducts(products) {
                             ${isPrimary ? '<i data-feather="star" class="feather-xs me-1"></i>' : ''}
                             ${listing.platform}
                         </span>
-                        <small class="text-truncate" style="max-width: 120px;">${escapeHtml(listing.sku)}</small>
+                        <div class="d-flex flex-column">
+                            <small class="text-truncate" style="max-width: 120px;">${escapeHtml(listing.sku)}</small>
+                            <small class="text-muted">Qty: ${listing.quantity ?? listing.available_quantity ?? product.quantity ?? 0}</small>
+                        </div>
                     </div>`;
             });
         }
