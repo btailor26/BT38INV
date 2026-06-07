@@ -925,6 +925,7 @@ function renderWarehouseProducts(products) {
                         <div class="d-flex flex-column">
                             <small class="text-truncate" style="max-width: 120px;">${escapeHtml(listing.sku)}</small>
                             <small class="text-muted">Qty: ${listing.quantity ?? listing.available_quantity ?? product.quantity ?? 0}</small>
+                            ${(listing.is_fba || listing.amazon_fulfillment_channel === 'AFN') ? `<small><a class="text-info text-decoration-none" href="/amazon-fba-stock?search=${encodeURIComponent(listing.sku || listing.external_sku || '')}" title="Open FBA read-only stock for this SKU">FBA Stock</a></small>` : ''}
                         </div>
                     </div>`;
             });
