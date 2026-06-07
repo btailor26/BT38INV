@@ -1,0 +1,23 @@
+.git
+.gitignore
+.env
+.env.*
+.local
+.pytest_cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.log
+logs
+instance
+reports
+attached_assets
+sentinel
+docs
+*.lnk
+* - Shortcut.lnk
+*.bak
+*.backup*
+bt38-exit-pack*
+cookies
