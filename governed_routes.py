@@ -2016,7 +2016,7 @@ def governed_product_linking_data_compat():
     It is read-only and does not push, sync, repair, or mutate marketplace state.
     """
     from extensions import db
-    from models import WarehouseStock, MarketplaceListing, AmazonFBAInventory
+    from models import WarehouseStock, MarketplaceListing
     from sqlalchemy import or_
 
     search = (request.args.get("search") or request.args.get("q") or "").strip()
@@ -2106,64 +2106,10 @@ def governed_product_linking_data_compat():
     else:
         listing_rows = []
 
-    fba_qty_by_sku = {}
-    fba_qty_by_fnsku = {}
-
-    fba_skus = [
-        listing.external_sku
-        for listing in listing_rows
-        if (
-            bool(getattr(listing, "is_fba", False))
-            or getattr(listing, "amazon_fulfillment_channel", None) == "AFN"
-        )
-        and listing.external_sku
-    ]
-
-    fba_fnskus = [
-        listing.fnsku
-        for listing in listing_rows
-        if (
-            bool(getattr(listing, "is_fba", False))
-            or getattr(listing, "amazon_fulfillment_channel", None) == "AFN"
-        )
-        and listing.fnsku
-    ]
-
-    if fba_skus or fba_fnskus:
-        fba_rows = (
-            db.session.query(AmazonFBAInventory)
-            .filter(or_(
-                AmazonFBAInventory.seller_sku.in_(fba_skus or ["__BT38_NO_SKU__"]),
-                AmazonFBAInventory.fnsku.in_(fba_fnskus or ["__BT38_NO_FNSKU__"]),
-            ))
-            .all()
-        )
-
-        for row in fba_rows:
-            qty = int(getattr(row, "available_quantity", 0) or 0)
-            if row.seller_sku:
-                fba_qty_by_sku[row.seller_sku] = qty
-            if row.fnsku:
-                fba_qty_by_fnsku[row.fnsku] = qty
-
     listings_by_stock = {}
     unlinked_listings = []
 
     for listing in listing_rows:
-        listing_effective_quantity = int(getattr(listing, "effective_quantity", 0) or 0)
-        is_fba_listing = (
-            bool(getattr(listing, "is_fba", False))
-            or getattr(listing, "amazon_fulfillment_channel", None) == "AFN"
-        )
-
-        if is_fba_listing:
-            listing_quantity = fba_qty_by_sku.get(listing.external_sku)
-            if listing_quantity is None:
-                listing_quantity = fba_qty_by_fnsku.get(listing.fnsku)
-            listing_quantity = int(listing_quantity or 0)
-        else:
-            listing_quantity = listing_effective_quantity
-
         listing_payload = {
             "id": listing.id,
             "external_sku": listing.external_sku,
@@ -2181,10 +2127,10 @@ def governed_product_linking_data_compat():
             "amazon_fulfillment_channel": listing.amazon_fulfillment_channel,
             "is_fba": bool(getattr(listing, "is_fba", False)),
             "is_pushable": bool(getattr(listing, "is_pushable", False)),
-            "quantity": listing_quantity,
-            "available_quantity": listing_quantity,
-            "sellable_quantity": listing_quantity,
-            "effective_quantity": listing_effective_quantity,
+            "quantity": getattr(listing, "effective_quantity", 0),
+            "available_quantity": getattr(listing, "effective_quantity", 0),
+            "sellable_quantity": getattr(listing, "effective_quantity", 0),
+            "effective_quantity": getattr(listing, "effective_quantity", 0),
         }
 
         if listing.warehouse_stock_id:
