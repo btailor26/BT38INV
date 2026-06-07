@@ -22,7 +22,7 @@
 </div>
 
             <div class="d-flex gap-2">
-                <a href="{{ url_for('routes.product_linking') }}?search={{ stock_item.sku }}" class="btn btn-primary">
+                <a href="{{ url_for('governed.governed_product_linking_page') }}?search={{ stock_item.sku }}" class="btn btn-primary">
                     <i data-feather="send" class="me-1"></i>
                     Push via GroupView
                 </a>
@@ -170,7 +170,7 @@
                         <i data-feather="info" class="feather-sm me-1"></i>
                         <strong>Group Context Mode:</strong> This warehouse stock controls quantity for all linked listings. 
                         Use <strong>Adjust & Push</strong> to update quantity and push to all marketplaces in parallel.
-                        <a href="{{ url_for('routes.product_linking') }}?search={{ stock_item.sku }}" class="alert-link">Manage links in GroupView</a>
+                        <a href="{{ url_for('governed.governed_product_linking_page') }}?search={{ stock_item.sku }}" class="alert-link">Manage links in GroupView</a>
                     </small>
                 </div>
             </div>
@@ -185,7 +185,7 @@
             </div>
             <div class="card-body">
                 <p class="mb-2">This warehouse stock is not linked to any marketplace listings.</p>
-                <a href="{{ url_for('routes.product_linking') }}?search={{ stock_item.sku }}" class="btn btn-primary btn-sm">
+                <a href="{{ url_for('governed.governed_product_linking_page') }}?search={{ stock_item.sku }}" class="btn btn-primary btn-sm">
                     <i data-feather="link" class="me-1"></i>
                     Link in GroupView
                 </a>
@@ -638,7 +638,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="{{ url_for('routes.product_linking') }}?search={{ stock_item.sku }}" class="btn btn-primary">
+                <a href="{{ url_for('governed.governed_product_linking_page') }}?search={{ stock_item.sku }}" class="btn btn-primary">
                     <i data-feather="sliders" class="me-1"></i>
                     Go to Product Linking
                 </a>

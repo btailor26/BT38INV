@@ -8032,7 +8032,7 @@ def faq():
 
 @bp.route('/admin-product-linking')
 def admin_product_linking():
-    return redirect(url_for('routes.product_linking'))
+    return redirect(url_for('governed.governed_product_linking_page'))
 
 
 # === FINAL NAV FIX: ADMIN SYSTEM ACTIVITY ===
