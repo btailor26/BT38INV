@@ -2200,6 +2200,61 @@ def governed_product_linking_data_compat():
     })
 
 
+@governed_bp.get("/governed/product-linking/fba-stock-shortcut")
+def governed_product_linking_fba_stock_shortcut():
+    """Read-only FBA stock shortcut for Product Linking.
+
+    This does not change warehouse quantity, Product Linking quantity,
+    grouping, FBM, push, sync, or marketplace execution.
+    """
+    from flask import jsonify, request
+    from models import db, AmazonFBAInventory
+
+    sku = (request.args.get("sku") or "").strip()
+    fnsku = (request.args.get("fnsku") or "").strip()
+
+    if not sku and not fnsku:
+        return jsonify({
+            "ok": False,
+            "success": False,
+            "read_only": True,
+            "error": "sku_or_fnsku_required",
+        }), 400
+
+    query = db.session.query(AmazonFBAInventory)
+
+    if sku:
+        row = query.filter(AmazonFBAInventory.seller_sku == sku).first()
+    else:
+        row = query.filter(AmazonFBAInventory.fnsku == fnsku).first()
+
+    if not row:
+        return jsonify({
+            "ok": True,
+            "success": True,
+            "read_only": True,
+            "found": False,
+            "sku": sku,
+            "fnsku": fnsku,
+            "sellable": 0,
+        })
+
+    return jsonify({
+        "ok": True,
+        "success": True,
+        "read_only": True,
+        "found": True,
+        "sku": row.seller_sku,
+        "fnsku": row.fnsku,
+        "asin": row.asin,
+        "title": row.title,
+        "sellable": int(row.available_quantity or 0),
+        "reserved": int(row.reserved_quantity or 0),
+        "inbound": int(row.inbound_quantity or 0),
+        "source": "AmazonFBAInventory.available_quantity",
+    })
+
+
 @governed_bp.get("/governed/product-linking/search-all-listings")
 def governed_product_linking_search_all_listings_compat():
     return governed_product_linking_data_compat()
