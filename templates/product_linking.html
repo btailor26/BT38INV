@@ -836,6 +836,8 @@ async function loadProductLinkingData() {
         document.getElementById('warehouseLoadingState').classList.add('d-none');
         document.getElementById('warehouseDataContainer').classList.remove('d-none');
         
+        hydrateFbaStockShortcuts();
+
         // Re-initialize feather icons
         if (typeof feather !== 'undefined') {
             feather.replace();
@@ -862,6 +864,34 @@ async function loadProductLinkingData() {
             feather.replace();
         }
     }
+}
+
+async function hydrateFbaStockShortcuts() {
+    const nodes = Array.from(document.querySelectorAll('[data-fba-stock-shortcut]'));
+    if (!nodes.length) return;
+
+    await Promise.all(nodes.map(async (node) => {
+        const sku = node.getAttribute('data-sku') || '';
+        const fnsku = node.getAttribute('data-fnsku') || '';
+        const params = new URLSearchParams();
+
+        if (sku) params.set('sku', sku);
+        if (fnsku) params.set('fnsku', fnsku);
+
+        try {
+            const response = await fetch(`/governed/product-linking/fba-stock-shortcut?${params.toString()}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+
+            if (data && data.success && data.found) {
+                node.textContent = `FBA: ${data.sellable ?? 0}`;
+            } else {
+                node.textContent = 'FBA: 0';
+            }
+        } catch (error) {
+            node.textContent = 'FBA: unavailable';
+        }
+    }));
 }
 
 function renderWarehouseProducts(products) {
@@ -924,7 +954,10 @@ function renderWarehouseProducts(products) {
                         </span>
                         <div class="d-flex flex-column">
                             <small class="text-truncate" style="max-width: 120px;">${escapeHtml(listing.sku)}</small>
-                            <small class="text-muted">Qty: ${listing.quantity ?? listing.available_quantity ?? product.quantity ?? 0}</small>
+                            <small class="text-muted">
+                                Qty: ${listing.quantity ?? listing.available_quantity ?? product.quantity ?? 0}
+                                ${(listing.is_fba || listing.amazon_fulfillment_channel === 'AFN') ? `<span class="text-info ms-1" data-fba-stock-shortcut data-sku="${escapeHtml(listing.sku || listing.external_sku || '')}" data-fnsku="${escapeHtml(listing.fnsku || '')}">FBA: loading</span>` : ''}
+                            </small>
                             ${(listing.is_fba || listing.amazon_fulfillment_channel === 'AFN') ? `<small><a class="text-info text-decoration-none" href="/amazon-fba-stock?search=${encodeURIComponent(listing.sku || listing.external_sku || '')}" title="Open FBA read-only stock for this SKU">FBA Stock</a></small>` : ''}
                         </div>
                     </div>`;
